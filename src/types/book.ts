@@ -11,15 +11,13 @@ export interface Book {
   id: string
   title: string
   author: string
-  cover?: string
-  file: string
-  genre?: string
+  cover: string
   progress: number
-  currentPage: number
-  totalPages: number
-  currentCfi: string
   lastRead?: number
-  isFavorite?: boolean
-  isFeatured?: boolean
-  annotations: Annotation[]
+  genre?: string
+  isFavorite: boolean
+  isFeatured: boolean
+  file: string
+  currentCfi?: string
+  currentChapter?: number
 } 

@@ -1,5 +1,5 @@
 <template>
-    <div class="home">
+    <div class="home" @contextmenu.prevent>
       <!-- Header Section -->
       <header class="header">
         <div class="logo">
@@ -7,6 +7,15 @@
           <h1>Fs-reader</h1>
         </div>
         <div class="header-actions">
+          <a 
+            href="https://1lib.sk"
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="z-library-link"
+          >
+            <Icon icon="mdi:library" class="library-icon" />
+            <span>Z-Library</span>
+          </a>
           <input
             type="file"
             ref="fileInput"
@@ -83,7 +92,7 @@
         <div class="shelf" v-for="(group, index) in groupedBooks" :key="index">
           <div class="shelf-shadow"></div>
           <div class="books">
-            <div v-for="book in group" :key="book.id" class="book">
+            <div v-for="book in group" :key="book.id" class="book" @contextmenu.prevent.stop="showBookPreview(book)">
               <!-- 书脊 -->
               <div class="book-spine" @click="openBook(book.id)">
                 <img :src="book.cover || '/default-cover.png'" :alt="book.title" class="spine-cover">
@@ -94,10 +103,15 @@
               </div>
   
               <!-- 书籍预览 -->
-              <div class="book-preview">
+              <div 
+                class="book-preview" 
+                :class="{ 'preview-fixed': book.id === activeBookId }"
+              >
+                <div class="preview-header">
+                  <h3>{{ book.title }}</h3>
+                </div>
                 <img :src="book.cover || '/default-cover.png'" :alt="book.title" class="preview-cover">
                 <div class="preview-info">
-                  <h3>{{ book.title }}</h3>
                   <p>{{ book.author }}</p>
                   <div class="progress-bar">
                     <div :style="{ width: book.progress + '%' }" class="progress"></div>
@@ -108,6 +122,14 @@
                       <Icon icon="mdi:book-open-variant" />
                       继续阅读
                     </button>
+                    <button 
+                      @click.stop="toggleFavorite(book.id)" 
+                      class="action-btn favorite"
+                      :class="{ active: book.isFavorite }"
+                    >
+                      <Icon icon="mdi:heart" />
+                      收藏
+                    </button>
                     <button @click="confirmDelete(book)" class="action-btn delete">
                       <Icon icon="mdi:delete" />
                       删除
@@ -115,15 +137,6 @@
                   </div>
                 </div>
               </div>
-  
-              <!-- 收藏按钮 -->
-              <button
-                class="favorite-btn"
-                @click.stop="toggleFavorite(book.id)"
-                :class="{ favorite: book.isFavorite }"
-              >
-                <Icon icon="mdi:heart" />
-              </button>
             </div>
           </div>
         </div>
@@ -163,7 +176,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useBookStore } from '../stores/bookStore'
   import { Icon } from '@iconify/vue'
@@ -353,9 +366,37 @@
     await bookStore.loadBooks()
   }
   
-  // 组件挂载时加载数据
+  // 添加新的响应式变量
+  const activeBookId = ref<string | null>(null)
+  
+  // 添加新的方法
+  const showBookPreview = (book: Book) => {
+    // 如果当前书已经激活，则关闭预览
+    if (activeBookId.value === book.id) {
+      activeBookId.value = null
+    } else {
+      activeBookId.value = book.id
+    }
+  }
+  
+  // 添加点击其他地方关闭预览的处理
+  const closePreview = (event: MouseEvent) => {
+    // 检查点击是否在预览卡片外
+    const target = event.target as HTMLElement
+    if (!target.closest('.book-preview') && !target.closest('.book-spine')) {
+      activeBookId.value = null
+    }
+  }
+  
+  // 在组件挂载时添加点击监听
   onMounted(() => {
+    document.addEventListener('click', closePreview)
     bookStore.loadBooks()
+  })
+  
+  // 在组件卸载时移除监听
+  onUnmounted(() => {
+    document.removeEventListener('click', closePreview)
   })
   </script>
   
@@ -368,6 +409,9 @@
     padding: 2rem;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     color: #333;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
   
   /* Header Section */
@@ -376,6 +420,10 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
   
     .logo {
       display: flex;
@@ -395,6 +443,34 @@
     }
   
     .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+  
+      .z-library-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        background: #2196F3;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  
+        &:hover {
+          background: #1976D2;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+  
+        .library-icon {
+          font-size: 1.2rem;
+        }
+      }
+  
       .upload-btn {
         display: flex;
         align-items: center;
@@ -427,6 +503,10 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
   
     .search-bar {
       position: relative;
@@ -501,6 +581,11 @@
     display: flex;
     gap: 2rem;
     margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
+    justify-content: center;
   
     .stat-card {
       display: flex;
@@ -536,55 +621,63 @@
   .bookshelf {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1rem;
   }
   
   .shelf {
-    margin-bottom: 4rem;
+    margin-bottom: 6rem;
     position: relative;
-    perspective: 1000px;
+    perspective: 1200px;
+    z-index: 1;
   
     .shelf-shadow {
-      height: 24px;
-      background: linear-gradient(to right, #c4c8cc, #d4d8dc, #c4c8cc);
-      border-radius: 4px;
+      height: 30px;
+      background: linear-gradient(to right, #d4d8dc, #e4e8ec, #d4d8dc);
+      border-radius: 6px;
       position: relative;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   
       &::after {
         content: '';
         position: absolute;
         left: 0;
         right: 0;
-        bottom: -12px;
-        height: 12px;
+        bottom: -15px;
+        height: 15px;
         background: linear-gradient(to bottom, rgba(0,0,0,0.08), transparent);
       }
     }
   
     .books {
+      position: relative;
       display: flex;
       flex-wrap: wrap;
-      gap: 2rem;
+      gap: 2.5rem;
       justify-content: flex-start;
-      padding: 1.5rem 0;
+      padding: 2rem 0;
     }
   }
   
   .book {
-    flex: 0 0 140px;
+    flex: 0 0 130px;
     position: relative;
     transform-style: preserve-3d;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-right: 1rem;
+    margin-right: 0;
+    user-select: none; /* 防止文本选中 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   
     &:hover {
-      transform: translateY(-15px) rotateX(12deg);
+      transform: translateY(-20px) rotateX(15deg);
+      z-index: 10;
   
       .book-spine {
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       }
   
-      .book-preview {
+      .book-preview:not(.preview-fixed) {
         opacity: 1;
         visibility: visible;
         transform: translateY(0) translateX(20px) translateZ(50px);
@@ -593,15 +686,17 @@
   }
   
   .book-spine {
-    width: 140px;
-    height: 200px;
-    background: linear-gradient(to right, #1a2634, #2c3e50);
-    border-radius: 3px;
+    width: 130px;
+    height: 190px;
+    background: linear-gradient(45deg, #1a2634, #2c3e50);
+    border-radius: 4px;
     padding: 0;
     cursor: pointer;
     position: relative;
     transform-origin: left;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    box-shadow: 
+      2px 0 8px rgba(0,0,0,0.15),
+      inset -1px 0 2px rgba(255,255,255,0.1);
     transition: all 0.3s ease;
     overflow: hidden;
   
@@ -623,8 +718,11 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 1rem 0.5rem;
-      background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.3), transparent);
+      padding: 1.2rem 0.8rem;
+      background: linear-gradient(to top, 
+        rgba(0,0,0,0.95) 0%,
+        rgba(0,0,0,0.7) 50%,
+        transparent 100%);
       color: white;
   
       .title {
@@ -649,21 +747,31 @@
     left: 100%;
     width: 280px;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    padding: 1.2rem;
+    border-radius: 15px;
+    box-shadow: 
+      0 10px 30px rgba(0,0,0,0.15),
+      0 2px 10px rgba(0,0,0,0.1);
+    padding: 1.5rem;
     opacity: 0;
     visibility: hidden;
     transform: translateY(30px) translateX(0) translateZ(0);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 10;
+    z-index: 100;
+    pointer-events: none;
+  
+    &.preview-fixed {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) translateX(20px) translateZ(50px);
+      pointer-events: auto; /* 允许交互 */
+    }
   
     .preview-cover {
       width: 100%;
       height: 180px;
       object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
       background: #f5f5f5;
     }
   
@@ -713,12 +821,20 @@
   .action-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.7rem 1rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    flex: 1;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  
+    .iconify {
+      font-size: 1.3rem;
+    }
   
     &.read {
       background: #4caf50;
@@ -726,6 +842,19 @@
   
       &:hover {
         background: color.scale(#4caf50, $lightness: -5%);
+      }
+    }
+  
+    &.favorite {
+      background: #ff4081;
+      color: white;
+  
+      &:hover {
+        background: color.scale(#ff4081, $lightness: -5%);
+      }
+  
+      &.active {
+        background: #e91e63;
       }
     }
   
@@ -737,29 +866,16 @@
         background: color.scale(#f44336, $lightness: -5%);
       }
     }
-  }
-  
-  .favorite-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #ccc;
-    transition: color 0.2s;
-  
-    &.favorite {
-      color: #e91e63;
-    }
   
     &:hover {
-      color: #e91e63;
+      transform: translateY(-2px);
     }
+  }
   
-    .iconify {
-      font-size: 1.2rem;
-    }
+  .preview-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
   
   /* Empty State Section */
@@ -922,6 +1038,25 @@
   /* Global Hidden Class */
   .hidden {
     display: none;
+  }
+  
+  /* 响应式优化 */
+  @media (max-width: 768px) {
+    .header-actions {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      
+      .z-library-link,
+      .upload-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .shelf .books {
+      gap: 1.5rem;
+      justify-content: center;
+    }
   }
   </style>
   
