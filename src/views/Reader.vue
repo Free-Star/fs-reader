@@ -1397,7 +1397,7 @@ const handleTextSelection = async (cfiRange: string, contents: any) => {
   try {
     console.log('handleTextSelection called with CFI:', cfiRange)
 
-    // 确 contents 和 window 象存在
+    // 确保 contents 和 window 对象存在
     if (!contents?.window) {
       console.warn('Contents window not available')
       return
@@ -1450,7 +1450,7 @@ const handleTextSelection = async (cfiRange: string, contents: any) => {
       y: toolbarY
     }
 
-    // 创建新的标注时使用当前选择的颜色
+    // 创建新的标注对象,但不立即应用高亮
     currentAnnotation.value = {
       id: Date.now().toString(),
       cfi: cfiRange,
@@ -1458,15 +1458,6 @@ const handleTextSelection = async (cfiRange: string, contents: any) => {
       color: currentHighlightColor.value,
       createdAt: Date.now()
     }
-
-    // 立即应用高亮样式
-    rendition.value?.annotations.highlight(
-      cfiRange,
-      {},
-      () => {},
-      '',
-      { fill: currentHighlightColor.value }
-    )
 
     console.log('Selection toolbar position set to:', selectionToolbar.value)
   } catch (error) {
@@ -1487,7 +1478,7 @@ const saveHighlight = async () => {
       return
     }
 
-    // 添加高亮
+    // 在这里应用高亮
     rendition.value.annotations.highlight(
       currentAnnotation.value.cfi,
       {},
@@ -1722,7 +1713,7 @@ onMounted(async () => {
             if (isValidCfi) {
               await rendition.value.display(lastCfi)
             } else if (currentBook.value.currentCfi) {
-              // 尝试使��存储在 store 中的 CFI
+              // 尝试使用存储在 store 中的 CFI
               await rendition.value.display(currentBook.value.currentCfi)
             } else if (currentBook.value.currentPage > 0) {
               // 尝试使用存储的页码

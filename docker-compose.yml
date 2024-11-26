@@ -1,12 +1,13 @@
 version: '3'
 
 services:
-  frontend:
+  app:
     build: .
     ports:
-      - "6666:6666"
+      - "9000:5173"
     volumes:
       - .:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development 
+      - NODE_ENV=development
+    restart: always
