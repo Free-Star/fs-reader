@@ -5,7 +5,7 @@
       <router-link 
         to="/" 
         class="sidebar-header"
-        @click="activeBookId = null" 
+        @click="resetFilters" 
       >
         <div class="logo">
           <Icon icon="mdi:book-open-page-variant" class="logo-icon" />
@@ -148,8 +148,10 @@
       <!-- 空状态 -->
       <div v-else class="empty-state">
         <Icon icon="mdi:bookshelf" class="empty-icon" />
-        <p>书架空空如也</p>
-        <button class="upload-btn" @click="triggerFileInput">添加第一本书</button>
+        <p>{{ showFavorites ? '暂无收藏书籍' : '书架空空如也' }}</p>
+        <button v-if="!showFavorites" class="upload-btn" @click="triggerFileInput">
+          添加第一本书
+        </button>
       </div>
 
       <!-- 设置对话框 -->
@@ -217,7 +219,7 @@ const showDeleteDialog = ref(false)
 const bookToDelete = ref<Book | null>(null)
 const showSettings = ref(false)
 
-// 主题���
+// 主题
 const themes = [
   { name: '默认', value: 'default' },
   { name: '蓝色渐变', value: 'blue-gradient' },
@@ -402,7 +404,7 @@ const showBookPreview = (book: Book) => {
 
 // 修改过滤收藏书籍的方法
 const filterFavorites = () => {
-  showFavorites.value = !showFavorites.value // 切换收藏状态
+  showFavorites.value = true  // 只设置为 true，不再切换
   searchQuery.value = ''
 }
 
@@ -434,6 +436,13 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', closePreview)
 })
+
+// 在 script setup 部分添加重置过滤器的方法
+const resetFilters = () => {
+  showFavorites.value = false
+  activeBookId.value = null
+  searchQuery.value = ''
+}
 </script>
 
 <style scoped lang="scss">

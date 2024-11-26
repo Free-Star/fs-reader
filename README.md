@@ -8,6 +8,8 @@
 - 📖 在线阅读电子书
 - 🔖 阅读进度保存
 - 🌙 支持深色/浅色主题切换
+- 📝 支持标注和笔记功能
+- 🔗 外链z-library,解决书籍资源问题
 
 ## 技术栈
 
@@ -17,44 +19,56 @@
 - Vue Router
 - SCSS
 
-## 开始使用
+## 部署
 
-### 环境要求
+### Git 部署
 
-- Node.js 20.0 或更高版本
-- npm 9.0 或更高版本
+1. 克隆项目
+```bash
+git clone https://github.com/your-username/fs-reader.git
+cd fs-reader
+```
 
-### 安装
+2. 安装依赖
 ```bash
 npm install
-npm run dev
 ```
+
+3. 构建生产环境
+```bash
+npm run build
+```
+
+4. 启动项目
+```bash
+npm run preview
+```
+
+### Docker 部署
+
+1. 构建 Docker 镜像
+```bash
+docker build -t fs-reader .
+```
+
+2. 运行容器
+```bash
+docker run -d -p 9000:5173 fs-reader
+```
+
+或者使用 docker-compose:
+
+```bash
+docker-compose up -d
+```
+
+
 
 ## 许可证
 
 本项目采用 MIT 许可证
 
-MIT License
 
-Copyright (c) 2024 freestar
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
 
 ## 作者
 
