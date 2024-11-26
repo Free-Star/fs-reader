@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Book } from '@/types/book'
+import type { Book } from '../types/book'
 
 const DB_NAME = 'ebookDB'
 const DB_VERSION = 1
@@ -47,7 +47,7 @@ export const useBookStore = defineStore('book', {
       return state.books.filter(book => book.isFeatured).slice(0, 6)
     }
   },
-  
+
   actions: {
     async loadBooks() {
       this.loading = true
@@ -58,7 +58,10 @@ export const useBookStore = defineStore('book', {
         const transaction = db.transaction(STORE_NAME, 'readonly')
         const store = transaction.objectStore(STORE_NAME)
         const books = await promisifyRequest<Book[]>(store.getAll())
-        this.books = books
+        this.books = books.map(book => ({
+          ...book,
+          annotations: book.annotations || []
+        }))
       } catch (error) {
         this.error = '加载书籍失败'
         console.error('加载书籍失败:', error)
@@ -86,7 +89,7 @@ export const useBookStore = defineStore('book', {
         const db = await openDB()
         const transaction = db.transaction(STORE_NAME, 'readwrite')
         const store = transaction.objectStore(STORE_NAME)
-        await promisifyRequest(store.put(newBook))
+        await promisifyRequest(store.put(JSON.parse(JSON.stringify(newBook))))
         this.books.push(newBook)
       } catch (error) {
         this.error = '添加书籍失败'
@@ -96,7 +99,7 @@ export const useBookStore = defineStore('book', {
         this.loading = false
       }
     },
-    
+
     async updateBook(updatedBook: Book) {
       this.loading = true
       this.error = null
@@ -106,11 +109,17 @@ export const useBookStore = defineStore('book', {
         const transaction = db.transaction(STORE_NAME, 'readwrite')
         const store = transaction.objectStore(STORE_NAME)
         
-        await promisifyRequest(store.put(updatedBook))
+        // 深拷贝对象以确保可以被序列化
+        const bookToStore = JSON.parse(JSON.stringify({
+          ...updatedBook,
+          annotations: updatedBook.annotations || []
+        }))
+        
+        await promisifyRequest(store.put(bookToStore))
         
         const index = this.books.findIndex(book => book.id === updatedBook.id)
         if (index !== -1) {
-          this.books[index] = { ...updatedBook }
+          this.books[index] = bookToStore
         }
       } catch (error) {
         this.error = '更新书籍失败'

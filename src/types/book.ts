@@ -20,4 +20,7 @@ export interface Book {
   file: string
   currentCfi?: string
   currentChapter?: number
+  currentPage?: number
+  totalPages?: number
+  annotations?: Annotation[]
 } 
