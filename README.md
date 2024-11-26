@@ -13,7 +13,7 @@
 *阅读界面支持多种主题切换*
 
 ### 护眼模式
-![护眼模式](./screenshots/reader-green.png)
+![护眼模式](./screenshots/reader_green.png)
 *护眼模式支持多种主题切换*
 
 
