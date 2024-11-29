@@ -11,7 +11,7 @@
           <Icon icon="mdi:table-of-contents" />
           <span>目录</span>
         </button>
-        <button class="tool-btn" @click="toggleReadingMode">
+        <button class="tool-btn" @click="toggleReadingMode" v-if="!isPortrait">
           <Icon :icon="readingMode === 'scroll' ? 'mdi:book-open-page-variant' : 'mdi:format-pilcrow'" />
           <span>{{ readingMode === 'scroll' ? '滚动' : '分页' }}</span>
         </button>
@@ -22,7 +22,7 @@
       </div>
 
       <div class="sidebar-middle">
-        <button class="tool-btn" @click="prevPage">
+        <button class="tool-btn" @click="prevPage" v-if="!isPortrait">
           <Icon icon="mdi:chevron-up" />
         </button>
         <div class="progress-info">
@@ -51,11 +51,11 @@
             </svg>
             <span>{{ progress }}%</span>
           </div>
-          <div class="page-info">
+          <div class="page-info" v-if="!isPortrait">
             {{ currentPage + 1 }}/{{ totalPages || '-' }}
           </div>
         </div>
-        <button class="tool-btn" @click="nextPage">
+        <button class="tool-btn" @click="nextPage" v-if="!isPortrait">
           <Icon icon="mdi:chevron-down" />
         </button>
       </div>
@@ -237,6 +237,68 @@
   display: flex;
   background: #fafafa;
   overflow: hidden;
+
+  // 添加竖屏模式的媒体查询
+  @media screen and (orientation: portrait) {
+    flex-direction: column;
+    
+    .reader-sidebar {
+      width: 100%;
+      height: 60px;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 0 1rem;
+      border-right: none;
+      border-bottom: 1px solid #eee;
+
+      .sidebar-top,
+      .sidebar-middle,
+      .sidebar-bottom {
+        flex-direction: row;
+        padding: 0;
+        gap: 0.5rem;
+      }
+
+      .tool-btn {
+        width: 40px;
+        height: 40px;
+        
+        span {
+          display: none;
+        }
+      }
+
+      .progress-info {
+        flex-direction: row;
+        gap: 1rem;
+        align-items: center;
+
+        .progress-circle {
+          width: 40px;
+          height: 40px;
+        }
+
+        .page-info {
+          min-width: 60px;
+        }
+      }
+
+      .font-size-controls {
+        flex-direction: row;
+        gap: 0.5rem;
+      }
+    }
+
+    .reader-main {
+      height: calc(100% - 60px);
+
+      :deep(.epub-container) {
+        width: 100% !important;
+        margin-left: 0 !important;
+        height: 100% !important;
+      }
+    }
+  }
 }
 
 .reader-sidebar {
@@ -474,6 +536,22 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
       scroll-behavior: smooth;
+    }
+  }
+
+  // 修改阅读容器在竖屏模式下的样式
+  &.scroll-mode {
+    @media screen and (orientation: portrait) {
+      :deep(.epub-container) {
+        iframe {
+          padding: 0 20px;
+          
+          body {
+            max-width: 100% !important;
+            padding: 20px !important;
+          }
+        }
+      }
     }
   }
 }
@@ -817,6 +895,18 @@
       }
     }
   }
+
+  // 修改选择工具栏在竖屏模式下的样式
+  @media screen and (orientation: portrait) {
+    .toolbar-colors {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .toolbar-actions {
+      justify-content: center;
+    }
+  }
 }
 
 /* Transition Styles */
@@ -881,6 +971,142 @@
           background: rgba(0, 0, 0, 0.3);
         }
       }
+    }
+  }
+}
+
+// 修改目录和笔记面板在竖屏模式下的样式
+.toc-panel,
+.notes-panel {
+  @media screen and (orientation: portrait) {
+    width: 85%;
+    max-width: 300px;
+    
+    .toc-header,
+    .notes-header {
+      padding: 0.8rem;
+      
+      h3 {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .toc-content {
+      .toc-item {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+// 优化目录内容在竖屏模式下的显示
+.toc-content {
+  @media screen and (orientation: portrait) {
+    .toc-item {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+// 修改竖屏模式下的工具栏样式
+.reader {
+  @media screen and (orientation: portrait) {
+    .reader-sidebar {
+      height: 50px; // 减小高度
+      padding: 0 0.5rem;
+      
+      .sidebar-top,
+      .sidebar-middle,
+      .sidebar-bottom {
+        flex-direction: row;
+        padding: 0;
+        gap: 0.25rem; // 减小间距
+      }
+
+      .tool-btn {
+        width: 36px; // 减小按钮尺寸
+        height: 36px;
+        padding: 0;
+      }
+
+      .progress-info {
+        .progress-circle {
+          width: 36px; // 减小进度环尺寸
+          height: 36px;
+        }
+      }
+
+      .font-size-controls {
+        gap: 0.25rem;
+        
+        .font-size {
+          min-width: 40px;
+          text-align: center;
+        }
+      }
+
+      .theme-select {
+        width: 60px; // 增加宽度
+        height: 28px; // 增加高度
+        padding: 0 0.3rem;
+        font-size: 0.8rem;
+        margin-left: 0.5rem; // 添加左边距
+      }
+
+      .sidebar-bottom {
+        .font-size-controls {
+          gap: 0.25rem;
+          margin-right: 0.5rem; // 添加右边距，与主题选择器分开
+        }
+      }
+    }
+
+    .reader-main {
+      height: calc(100% - 50px); // 调整主内容区域高度
+    }
+  }
+}
+
+// 优化竖屏模式下的工具栏布局
+.reader-sidebar {
+  @media screen and (orientation: portrait) {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; // 三等分布局
+    align-items: center;
+    gap: 0.5rem; // 添加整体间距
+    
+    .sidebar-top {
+      justify-self: start;
+      display: flex;
+      gap: 0.25rem;
+    }
+    
+    .sidebar-middle {
+      justify-self: center;
+    }
+    
+    .sidebar-bottom {
+      justify-self: end;
+      display: flex;
+      align-items: center; // 确保垂直居中
+      gap: 0.5rem; // 增加组件间距
+    }
+  }
+}
+
+// 调整进度环在竖屏模式下的显示
+.progress-circle {
+  @media screen and (orientation: portrait) {
+    svg {
+      width: 36px;
+      height: 36px;
+    }
+    
+    span {
+      font-size: 0.7rem;
     }
   }
 }
@@ -994,7 +1220,7 @@ const applyTheme = async (themeName: string) => {
     // 选择主题
     await rendition.value.themes.select(themeName)
 
-    // 恢复位置
+    // 恢位置
     if (currentCfi) {
       await rendition.value.display(currentCfi)
     }
@@ -1526,7 +1752,7 @@ const saveNote = async () => {
   if (!currentAnnotation.value || !currentBook.value) return
 
   try {
-    // 如果是编辑现有笔记
+    // 如果是辑现有笔记
     if (currentBook.value.annotations?.some(a => a.id === currentAnnotation.value?.id)) {
       const index = currentBook.value.annotations.findIndex(a => a.id === currentAnnotation.value?.id)
       if (index !== -1) {
@@ -1563,7 +1789,7 @@ const saveNote = async () => {
       { fill: updatedAnnotation.color }
     )
 
-    // 更新书籍数据
+    // 更新��籍数据
     const updatedAnnotations = [...(currentBook.value.annotations || []), updatedAnnotation]
     await bookStore.updateBook({
       ...currentBook.value,
@@ -1626,7 +1852,19 @@ const formatDate = (timestamp: number) => {
   })
 }
 
-// 主初始化逻辑
+// 在 script setup 的开头添加 isPortrait ref 声明
+const isPortrait = ref(window.matchMedia('(orientation: portrait)').matches)
+
+// 在 onMounted 中移动竖屏检测相关代码到外面
+const mediaQuery = window.matchMedia('(orientation: portrait)')
+const handleOrientationChange = (e: MediaQueryListEvent) => {
+  isPortrait.value = e.matches
+  if (e.matches) {
+    // 竖屏模式下强制使用分页模式
+    readingMode.value = 'paginated'
+  }
+}
+
 onMounted(async () => {
   const bookId = route.params.bookId as string
   currentBook.value = bookStore.books.find(b => b.id === bookId)
@@ -1756,6 +1994,14 @@ onMounted(async () => {
     console.error('Error loading book:', error)
     alert('加载电子书时出错')
   }
+
+  // 添加屏幕方向变化监听
+  window.matchMedia('(orientation: portrait)').addEventListener('change', async () => {
+    await updateRendition()
+  })
+
+  // 添加竖屏检测监听
+  mediaQuery.addEventListener('change', handleOrientationChange)
 })
 
 // 更新渲染器
@@ -1783,7 +2029,7 @@ const updateRendition = async () => {
       height: rect.height,
       allowScriptedContent: true,
       allowPopups: false,
-      spread: readingMode.value === 'paginated' ? 'auto' : 'none',
+      spread: isPortrait.value ? 'none' : 'auto', // 使用 ref 值来判断
       flow: readingMode.value === 'paginated' ? 'paginated' : 'scrolled-doc',
       minSpreadWidth: 0,
       manager: readingMode.value === 'paginated' ? 'default' : 'continuous'
@@ -1808,14 +2054,16 @@ const updateRendition = async () => {
     // 设置默认样式
     rendition.value.themes.default({
       'body': {
-        'padding': readingMode.value === 'paginated' ? '40px 20px' : '40px 60px',
+        'padding': readingMode.value === 'paginated' 
+          ? (isPortrait.value ? '20px 15px' : '40px 20px')
+          : '40px 20px',
         'max-width': readingMode.value === 'paginated' ? 'none' : '800px',
         'margin': '0 auto',
         'font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         'line-height': '1.8',
         'text-align': 'justify',
         'font-size': `${fontSize.value}px`,
-        'column-gap': readingMode.value === 'paginated' ? '40px' : 'inherit',
+        'column-gap': readingMode.value === 'paginated' ? '20px' : 'inherit',
         'width': readingMode.value === 'paginated' ? 'auto' : '100%'
       }
     })
@@ -1926,5 +2174,13 @@ onUnmounted(() => {
   if (wheelThrottleTimeout.value) {
     clearTimeout(wheelThrottleTimeout.value)
   }
+
+  // 移除屏幕方向变化监听
+  window.matchMedia('(orientation: portrait)').removeEventListener('change', async () => {
+    await updateRendition()
+  })
+
+  // 移除竖屏检测监听
+  mediaQuery.removeEventListener('change', handleOrientationChange)
 })
 </script>

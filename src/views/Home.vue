@@ -699,23 +699,13 @@ html, body, #app {
 }
 
 .shelf {
-  display: flex;
-  flex-direction: column;
   margin-bottom: 2rem;
 
-  .shelf-shadow {
-    height: 10px;
-    background: #e0e0e0;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-  }
-
   .books {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 桌面端默认6列 */
     gap: 1rem;
-    flex-wrap: nowrap; /* 防止换行 */
-    overflow: visible; /* 允许溢出 */
-    position: relative; /* 为绝对定位的预览卡片提供参考 */
+    padding: 0 0.3rem;
   }
 }
 
@@ -1125,57 +1115,158 @@ html, body, #app {
 
   .sidebar {
     width: 100%;
+    height: auto;
     flex-direction: row;
     align-items: center;
-    padding: 1rem;
+    padding: 0.5rem;
+    gap: 0.5rem;
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
+    background: var(--secondary-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    .sidebar-header {
+      margin: 0;
+      flex: 0;
+      
+      .logo {
+        h1 {
+          display: none; /* 隐藏文字logo */
+        }
+        
+        .logo-icon {
+          font-size: 1.5rem;
+          margin: 0;
+        }
+      }
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin: 0;
+
+      .nav-link {
+        padding: 0.4rem;
+        min-width: auto;
+
+        span {
+          display: none; /* 隐藏文字 */
+        }
+
+        .nav-icon {
+          font-size: 1.3rem;
+          margin: 0;
+        }
+      }
+
+      .divider {
+        display: none;
+      }
+    }
   }
 
-  .sidebar-nav {
-    flex-direction: row;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .sidebar-header {
-    flex: 1;
-    justify-content: center;
-    text-align: center;
-  }
-
+  /* 调整主内容区域的上边距 */
   .main-content {
-    padding: 1rem;
+    padding-top: 0.5rem;
+
+    /* 搜索栏样式优化 */
+    .control-panel {
+      margin: 0 0 0.8rem 0;
+      padding: 0;
+
+      .search-bar {
+        flex: 1;
+        
+        .search-input {
+          padding: 0.4rem 0.4rem 0.4rem 2rem;
+          font-size: 0.9rem;
+        }
+
+        .search-icon {
+          left: 0.5rem;
+        }
+      }
+
+      .settings-icon-btn {
+        padding: 0.4rem;
+        
+        .settings-icon {
+          font-size: 1.3rem;
+        }
+      }
+    }
   }
 
-  .control-panel {
-    flex-direction: row;
-    align-items: center;
+  /* 书架布局优化 - 4列布局 */
+  .shelf {
+    margin-bottom: 1.5rem;
+
+    .books {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); /* 修改为4列 */
+      gap: 0.8rem;
+      padding: 0 0.3rem;
+    }
+  }
+
+  /* 调整书籍尺寸 */
+  .book {
+    width: 100%;
+    
+    .book-spine {
+      height: 160px; /* 增加高度使比例更合适 */
+      
+      .spine-info {
+        padding: 0.4rem;
+        
+        .title {
+          font-size: 0.8rem;
+        }
+        
+        .author {
+          font-size: 0.7rem;
+        }
+      }
+    }
+
+    /* 调整预览卡片位置 */
+    .book-preview {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      max-width: 90vw;
+      z-index: 1000;
+      
+      &.preview-fixed {
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+}
+
+/* 小屏幕设备额外优化 */
+@media (max-width: 480px) {
+  .shelf .books {
+    grid-template-columns: repeat(3, 1fr); /* 更小屏幕显示3列 */
+    gap: 0.6rem;
+  }
+
+  .book .book-spine {
+    height: 140px;
+  }
+}
+
+@media (max-width: 360px) {
+  .shelf .books {
+    grid-template-columns: repeat(2, 1fr); /* 最小屏幕显示2列 */
     gap: 0.5rem;
-  }
-
-  .search-bar {
-    max-width: 100%;
-  }
-
-  .bookshelf .books {
-    justify-content: center;
-    gap: 1rem;
-  }
-
-  .book-preview {
-    left: 110%;
-    width: 180px;
-  }
-
-  /* 调整侧边栏内按钮样式以适应横向排列 */
-  .sidebar-nav .nav-link {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .divider {
-    display: none; /* 在移动设备上隐藏分割线 */
   }
 }
 </style>
